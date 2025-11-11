@@ -11,9 +11,7 @@ This repository contains two main exercises:
 
 ### (1) Print Command-Line Arguments
 A simple program that prints all arguments passed to `main()` using `argc` and `argv`.
-
-- Demonstrates how arguments are handled in C programs.
-- Helps understand the structure of the `argv` array and the role of `argc`.
+This helped to understand how arguments are handled in C programs and the structure of the `argv` array and the role of `argc`.
 
 **Example:**
 ```bash
@@ -32,10 +30,10 @@ This exercise constist to reimplements standard C string functions to try to thi
 - **`mystrcpy()`** and **`mystrcpy2()`** → copy strings manually using pointer arithmetic  (and is Cleanest version that i tryed after)
 - **`mystrcat()`** and **`mystrcat2()`** → concatenate two strings  (and is Cleanest version that i tryed after)
 - **`mystrlen()`** → calculate string length  
-- **`mystrcmp()`** → compare two strings lexicographically  (here i implemented directly the cleanest version i was able to write)
+- **`mystrcmp()`** → compare two strings using ASCII scale  (here i implemented directly the cleanest version i was able to write)
 
-Each function mimics the behavior of its standard library counterpart (`strcpy`, `strcat`, `strlen`, `strcmp`),  
-but operates using explicit pointer logic (`*ptr`, `ptr++`) instead of array indexing.
+I wrote using function that mimics the behavior of its standard library counterpart (`strcpy`, `strcat`, `strlen`, `strcmp`),  
+but operates using explicit pointer logic (`*ptr`) instead of array indexing and sometime pointer increase annotation (`ptr++`) .
 
 **Output of the example written in the main:**
 
