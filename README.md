@@ -24,7 +24,7 @@ Argument 2: world
 Argument 3: 123
 ```
 
-###(2) Strings Functions
+### (2) Strings Functions
 This exercise constist to reimplements standard C string functions to try to think about and understand how they work internally.
 
 **Implemented functions**
