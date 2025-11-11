@@ -1,4 +1,4 @@
-#C Programming Exercises — Strings & Arguments
+# C Programming Exercises — Strings & Arguments
 
 A small collection of C programming exercises designed to strengthen understanding of **pointers**, **string operations**, and **command-line arguments**.  
 These exercises reimplement core C standard library functions and demonstrate how to manipulate strings manually using **pointer arithmetic**.
@@ -24,10 +24,10 @@ Argument 2: world
 Argument 3: 123
 ```
 
-#(2) Strings Functions
+###(2) Strings Functions
 This exercise constist to reimplements standard C string functions to try to think about and understand how they work internally.
 
-### Implemented functions
+**Implemented functions**
 
 - **`mystrcpy()`** and **`mystrcpy2()`** → copy strings manually using pointer arithmetic  (and is Cleanest version that i tryed after)
 - **`mystrcat()`** and **`mystrcat2()`** → concatenate two strings  (and is Cleanest version that i tryed after)
@@ -37,7 +37,7 @@ This exercise constist to reimplements standard C string functions to try to thi
 Each function mimics the behavior of its standard library counterpart (`strcpy`, `strcat`, `strlen`, `strcmp`),  
 but operates using explicit pointer logic (`*ptr`, `ptr++`) instead of array indexing.
 
-***Output of the example written in the main:***
+**Output of the example written in the main:**
 
 ```--CONCAT
 Hello: Part 2
