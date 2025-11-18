@@ -88,3 +88,15 @@ void int_matrix_print(const int_matrix matrix){
     }
     printf("\n");
 }
+
+void destroy_int_matrix_array(int_matrix_array m) {
+    //it should be possible to use a normal struct parameter here cause we work directly on his pointer
+    // free every element
+    for (int r = 0; r < m.n_rows; r++) {
+        free(m.data[r]);
+    }
+
+    // free root
+    free(m.data);
+    m.data = NULL;
+}

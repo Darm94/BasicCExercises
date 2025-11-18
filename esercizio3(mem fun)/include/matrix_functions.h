@@ -29,5 +29,6 @@ int  int_matrix_get_value(const int_matrix matrix,int raw_position,int col_posti
 int  int_matrix_get_size(const int_matrix matrix);
 void initiate_int_matrix(int_matrix matrix,int value);
 void int_matrix_set(int_matrix matrix,int raw_position,int col_postition,int new_value);
+void destroy_int_matrix_array(int_matrix_array m);
 
 #endif /* MATRIX_FUNCTIONS_H */

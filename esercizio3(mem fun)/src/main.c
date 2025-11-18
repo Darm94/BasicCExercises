@@ -142,6 +142,13 @@ int_matrix_array_print(matrix_array);
 
 printf("\nValue at Matrix[%d][%d] = %d",1,2,matrix_array.data[1][2]);
 
+//lets free the memory
+free(matrix.data);
+destroy_int_matrix_array(matrix_array);
+
 printf("\n************************  BYE TO THE NEXT EXERCISEE   ************************\n");
+
+
+
 
 }
