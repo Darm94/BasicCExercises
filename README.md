@@ -2,6 +2,8 @@
 
 A small collection of C programming exercises designed to strengthen understanding of **pointers**, **string operations**, and **command-line arguments**.  
 These exercises reimplement core C standard library functions and demonstrate how to manipulate strings manually using **pointer arithmetic**.
+[UPDATE excercise 3 added]
+>the third excercise is based on C memory management, string operations, and dynamic data structures.
 
 ---
 
@@ -60,3 +62,80 @@ Length of string_1: 5
 Length of string_5: 7
    --BYE TO THE NEXT EXERCISE!---
 ```
+## (3) Memory Functions & Dynamic Matrices
+
+This exercise focuses on **dynamic memory allocation in C** and on the use of standard functions such as `malloc`, `calloc`, `realloc`, and `free`.  
+The goal was to understand how memory is managed and to reimplement some of these functions manually, to see what they really do behind the scenes.
+
+### Implemented Custom Functions
+
+- **`my_memset()`** → manual implementation of `memset`, sets each byte to a specific value  
+- **`my_memcpy()`** → manual implementation of `memcpy`, copies bytes from one block to another  
+- **`my_calloc()`** → manual implementation of `calloc`, allocates and initializes to zero  
+- **`my_realloc()`** → simplified version of `realloc`, allocates a new block, copies old data, and frees the old memory
+
+These were tested against their standard counterparts to understand their behavior with different data types (especially the effect of `memset` on `int` arrays when the value is greater than 0).
+
+---
+
+### Dynamic Matrices Implementations
+
+In the last part, two different implementations of a **matrix structure** are compared.
+
+#### (a) Single Pointer Matrix (`int*`)
+In this approach, the matrix is stored in a **contiguous block of memory** using a single pointer.  
+All elements are placed sequentially in memory, and the index of a cell `[r][c]`
+
+```
+index = (r * columns) + c;
+```
+
+**Pros**
+- Better cache locality → faster access
+- Simple to allocate and free (only one `malloc` and one `free`)
+
+**Cons**
+- Harder to handle as a "matrix of rows" (you need manual index calculations)
+
+#### (b) Double Pointer Matrix (`int**`)
+Here, the matrix is an **array of pointers**, where each pointer represents a row.  
+Each row is allocated separately, resulting in a structure like this:
+
+```
+matrix.data -> [ * * * * * ] // n_rows pointers
+each -> malloc(m_columns * sizeof(int))
+```
+
+
+**Pros**
+- Each row can have a different length (flexible structure)
+- Access syntax like `matrix.data[row][col]` is very natural
+
+**Cons**
+- Multiple allocations → slightly slower and more memory overhead
+- Rows are not contiguous → less cache-efficient
+
+---
+
+### Example Output
+================ MALLOC dyn. array of size 3: ================
+num[0] = 1
+num[1] = 0
+num[2] = 0
+
+================ MY_MEMSET (setting each byte to 100) ================
+num[0] = 1684300900
+num[1] = 1684300900
+num[2] = 1684300900
+
+================ Dynamic Matrix with Struct and Functions ================
+[1][1][1][1]
+[1][1][1][1]
+...
+
+================ Dynamic Matrix using Pointer-to-Pointer Strategy ================
+[0][0][0][0]
+[0][0][0][0]
+[0][0][0][0]
+
+
