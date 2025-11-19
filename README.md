@@ -123,6 +123,7 @@ Thats the more typical approach for matrix in C (according to university courses
 ### Example Output
 ================ MALLOC dyn. array of size 3: ================
 
+
 num[0] = 1
 
 num[1] = 0
@@ -131,6 +132,7 @@ num[2] = 0
 
 
 ================ MY_MEMSET (setting each byte to 100) ================
+
 num[0] = 1684300900
 
 num[1] = 1684300900
@@ -139,6 +141,7 @@ num[2] = 1684300900
 
 
 ================ Dynamic Matrix with Struct and Functions ================
+
 [1][1][1][1]
 
 [1][1][1][1]
@@ -147,6 +150,7 @@ num[2] = 1684300900
 
 
 ================ Dynamic Matrix using Pointer-to-Pointer Strategy ================
+
 [0][0][0][0]
 
 [0][0][0][0]
