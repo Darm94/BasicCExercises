@@ -122,24 +122,37 @@ Thats the more typical approach for matrix in C (according to university courses
 
 ### Example Output
 ================ MALLOC dyn. array of size 3: ================
+
 num[0] = 1
+
 num[1] = 0
+
 num[2] = 0
+
 
 ================ MY_MEMSET (setting each byte to 100) ================
 num[0] = 1684300900
+
 num[1] = 1684300900
+
 num[2] = 1684300900
+
 
 ================ Dynamic Matrix with Struct and Functions ================
 [1][1][1][1]
+
 [1][1][1][1]
+
 ...
+
 
 ================ Dynamic Matrix using Pointer-to-Pointer Strategy ================
 [0][0][0][0]
+
 [0][0][0][0]
+
 [0][0][0][0]
+
 
 #### (c) Conclusions
 In my opinion both of these approaches are convenient depending on the situation, although approach (b) is more flexible and easier to handle with array-like access (matrix[0][5]) causing much less confusion. For both of them I decided to rely on a struct which in my opinion is the best way to manage the data related to the matrix without going crazy.
