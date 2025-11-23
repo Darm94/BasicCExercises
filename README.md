@@ -465,11 +465,7 @@ void aiv_vector_set(aiv_vector_t *vector, size_t index, void *item) {
 The vector stores `void*` items in a resizable array. Core goals:
 - **Generic**: store any pointer type; ordering is delegated to a user comparator.
 - **Simple API**: push (`add`), indexed access (`at`), bounded set (`set`), delete (shift+shrink), and sorting (bubble variants + quicksort).
-
-#### Comparator contract
-All sorting functions expect `int (*cmp)(void*, void*)` returning:
-- `< 0` if `a < b`, `0` if equal, `> 0` if `a > b`.  
-This keeps the vector type-agnostic and lets users define order (e.g., ints, structs, etc.).
+- **Different Sorting Ways**: This data collection configuration certainly allows for different ways to sequentially sort the data based on simplicity, stability, or performance needs. Below, we'll show a couple of selectable sorting examples, which in turn can be implemented in different ways.
 
 ---
 
