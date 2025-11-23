@@ -486,13 +486,13 @@ Keep the API minimal and safe: explicit bounds checks, pointer-only assignment (
 bool aiv_list_remove_item(aiv_list_t* list, void* item);
 bool aiv_list_remove_item_at(aiv_list_t* list, size_t index);
 ```
-remove_item searches by pointer identity (current->data == item) and removes the first match.
+- **remove_item searches by pointer identity (current->data == item) and removes the first match.**
 
-remove_item_at removes the node found at a specific index.
+- **remove_item_at removes the node found at a specific index.**
 
-Both functions handle the three canonical cases:
+- **Both functions handle the three canonical cases:**
 
-1.Head removal
+##### 1.Head removal #####
 ```
 [head] <-> n2 <-> n3
    |
@@ -500,7 +500,7 @@ Both functions handle the three canonical cases:
 list->head = head->next;
 if (list->head) list->head->prev = NULL;
 ```
-2.Tail removal
+##### 2.Tail removal #####
 ```
 n1 <-> n2 <-> [tail]
                 |
@@ -508,7 +508,7 @@ n1 <-> n2 <-> [tail]
 list->tail = tail->prev;
 if (list->tail) list->tail->next = NULL;
 ```
-3.Middle removal 
+##### 3.Middle removal #####
 ```
 n1 <-> [mid] <-> n3
 n1->next = n3;
@@ -520,7 +520,7 @@ Why this approach
 Explicit head/middle/tail branches keep the code readable and prevent dereferencing NULL neighbors.
 Removal is stable for the remaining elements (relative order of other nodes is preserved).
 
-Complexity & Behavior
+#### Complexity & Behavior ####
 
 Append (not shown here, via aiv_list_add): O(1) with tail pointer.
 
