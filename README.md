@@ -484,11 +484,9 @@ Keep the API minimal and safe: explicit bounds checks, pointer-only assignment (
 bool aiv_list_remove_item(aiv_list_t* list, void* item);
 bool aiv_list_remove_item_at(aiv_list_t* list, size_t index);
 ```
-- **remove_item searches by pointer identity (current->data == item) and removes the first match.**
-
-- **remove_item_at removes the node found at a specific index.**
-
-- **Both functions handle the three canonical cases:**
+- remove_item searches by pointer identity (current->data == item) and removes the first match.
+- remove_item_at removes the node found at a specific index.
+- Both functions handle the three canonical cases:
 
 ##### 1.Head removal #####
 ```
@@ -520,15 +518,11 @@ Removal is stable for the remaining elements (relative order of other nodes is p
 
 #### Complexity & Behavior ####
 
-Append (not shown here, via aiv_list_add): O(1) with tail pointer.
-
-get_item_at / set_item_at / remove_item_at: O(n) (linear traversal).
-
-remove_item (by pointer): O(n) worst-case search + O(1) splice.
-
-Stability: removing a node does not reorder remaining elements.
-
-Ownership: the list stores payload pointers only; it does not free user data.
+- Append (not shown here, via aiv_list_add): O(1) with tail pointer.
+- get_item_at / set_item_at / remove_item_at: O(n) (linear traversal).
+- remove_item (by pointer): O(n) worst-case search + O(1) splice.
+- Stability: removing a node does not reorder remaining elements.
+- Ownership: the list stores payload pointers only; it does not free user data.
 
 ---
 
@@ -570,9 +564,8 @@ bool aiv_dict_contains_key(aiv_dict_t* dict, void* key, size_t key_size) {
 }
 
   ```
-get does a bucket scan and returns the stored value pointer (no copy).
-
-contains_key is a thin wrapper around get for readability.
+- get does a bucket scan and returns the stored value pointer (no copy).
+- contains_key is a thin wrapper around get for readability.
 
 Complexity: average O(1), worst O(n) (all items in one bucket).
 ---
@@ -600,9 +593,8 @@ bool aiv_dict_remove(aiv_dict_t* dict, void* key, size_t key_size) {
 }
 
 ```
-Three cases handled explicitly: removing head, middle, or tail in the bucket list.
-
-Memory: the node and its copied key are freed; the value pointer is not freed (caller owns the pointee).
+- Three cases handled explicitly: removing head, middle, or tail in the bucket list.
+- Memory: the node and its copied key are freed; the value pointer is not freed (caller owns the pointee).
 
 Complexity: average O(1) (short bucket), worst O(n).
 ---
