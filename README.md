@@ -566,10 +566,10 @@ bool aiv_dict_contains_key(aiv_dict_t* dict, void* key, size_t key_size) {
   ```
 - get does a bucket scan and returns the stored value pointer (no copy).
 - contains_key is a thin wrapper around get for readability.
+- Complexity: average O(1), worst O(n) (all items in one bucket).
 
-Complexity: average O(1), worst O(n) (all items in one bucket).
 ---
-remove — pointer surgery in the bucket list
+#### remove — pointer surgery in the bucket list
 ```
 bool aiv_dict_remove(aiv_dict_t* dict, void* key, size_t key_size) {
     size_t hash_index = dict->hash_func(key, key_size) % dict->hashmap_size;
@@ -595,10 +595,10 @@ bool aiv_dict_remove(aiv_dict_t* dict, void* key, size_t key_size) {
 ```
 - Three cases handled explicitly: removing head, middle, or tail in the bucket list.
 - Memory: the node and its copied key are freed; the value pointer is not freed (caller owns the pointee).
+- Complexity: average O(1) (short bucket), worst O(n).
 
-Complexity: average O(1) (short bucket), worst O(n).
 ---
-size & items_count — why keep a counter
+#### size & items_count — why keep a counter
 ```
 size_t aiv_dict_get_size(aiv_dict_t* dict) { return dict->items_count; }
 size_t aiv_dict_get_hashmap_elements_size(aiv_dict_t* dict) { return dict->hashmap_size; }
@@ -610,8 +610,8 @@ Why: obtaining the number of pairs in O(1) without scanning all buckets. Scannin
 aiv_dict_get_hashmap_elements_size exposes the number of buckets (useful for load-factor diagnostics).
 
 ---
+#### destroy — walking every bucket safely
 
-destroy — walking every bucket safely
 ```
 void aiv_dict_destroy(aiv_dict_t* dict) {
     if (!dict || !dict->hashmap) return;
@@ -634,7 +634,7 @@ Frees every node in every bucket and the bucket array itself.
 Does not free values: the dictionary stores value pointers only (no deep copy). The caller owns the pointees.
 
 ---
-Ownership Model (explicit)
+#### Ownership Model (explicit)
 
 Keys: copied on put → freed by the dictionary.
 
@@ -642,7 +642,7 @@ Values: stored as raw pointers → not freed by the dictionary. The caller contr
 
 This keeps put/get/remove simple and predictable for the exercise. If you need automatic value cleanup, add a user-provided deleter callback and call it during remove/destroy.
 
-Complexity Summary
+#### Complexity Summary
 
 get / contains / put / remove: average O(1), worst O(n) (all items collide in one bucket).
 
