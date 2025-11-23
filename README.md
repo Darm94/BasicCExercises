@@ -435,7 +435,6 @@ The vector stores `void*` items in a resizable array. Core goals:
   - Worst-case **O(n²)** (e.g., adversarial data), but rare in practice with a center pivot.
   - The two inner `while` loops together scan each element at most once per partition → **linear work per partition**.
 
----
 
 ### Update & Delete Operations
 
@@ -460,7 +459,6 @@ void aiv_vector_set(aiv_vector_t *vector, size_t index, void *item) {
 
 A **doubly linked list** storing `void*` payloads. The design favors a small, predictable API with indexed helpers (for demos) and pointer-based removal.
 
----
 
 #### Core Accessors
 
@@ -532,13 +530,12 @@ Stability: removing a node does not reorder remaining elements.
 
 Ownership: the list stores payload pointers only; it does not free user data.
 
+---
 
 ### Dictionary (Hash Map) — Approach & Rationale
 
 A separate-chaining hash map storing **keys as copies** and **values as raw pointers** (`void*`).  
 Design goals: predictable O(1) average operations, simple memory ownership rules, and clear debugability for this exercise.
-
----
 
 #### Hashing & Equality
 
@@ -556,8 +553,8 @@ This avoids false positives between differently sized binary keys and supports n
 Collision handling: each bucket stores a singly linked list (aiv_dict_node_t* next).
 Why this approach
 Separate chaining is simple to implement and reason about: constant-time average access when the load factor (items/buckets) is controlled.
----
-get & contains_key
+
+#### get & contains_key
   ```
 void* aiv_dict_get(aiv_dict_t* dict, void* key, size_t key_size) {
     size_t hash_index = dict->hash_func(key, key_size) % dict->hashmap_size;
