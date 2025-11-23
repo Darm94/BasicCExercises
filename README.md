@@ -296,13 +296,7 @@ void   aiv_dict_debug_print_ints(aiv_dict_t* d);
 Notes: collisions handled with linked lists per bucket; key comparison = key_size + memcmp.
 
 ### Demos (excerpt from main.c)
-#### Comparator for integers
-```
-int compare_int(void* a, void* b) {
-    int x = *(int*)a, y = *(int*)b;
-    return (x < y) ? -1 : (x > y);
-}
-```
+
 #### Vector
 ```
 int array[5] = {3, 5, 2, 1, 4};
@@ -383,8 +377,83 @@ Get(8) = 6
 After remove:
 Pairs count:    3
 ```
+---
 
-Comparator & Hash
+### Vector — Design & Rationale
+
+The vector stores `void*` items in a resizable array. Core goals:
+- **Generic**: store any pointer type; ordering is delegated to a user comparator.
+- **Simple API**: push (`add`), indexed access (`at`), bounded set (`set`), delete (shift+shrink), and sorting (bubble variants + quicksort).
+
+#### Comparator contract
+All sorting functions expect `int (*cmp)(void*, void*)` returning:
+- `< 0` if `a < b`, `0` if equal, `> 0` if `a > b`.  
+This keeps the vector type-agnostic and lets users define order (e.g., ints, structs, etc.).
+
+---
+
+### Sorting Choices
+
+#### 1) `aiv_vector_sort_bubble2` — **Bubble Sort with early-exit**
+> _“Inspired by lesson pseudo-code”_ — the classic bubble pass with a `swapped` flag.
+
+- **Idea**: keep swapping adjacent out-of-order elements; if a full pass does no swaps, the array is sorted.
+- **Why this variant**: the `while (swapped)` pattern is the cleanest way to encode the **early termination** optimization for nearly-sorted inputs.
+- **Key properties**:
+  - Best case (already sorted): **O(n)** (one pass, `swapped` stays 0 after first pass).
+  - Average/worst case: **O(n²)**.
+  - **Stable** (adjacent swaps preserve relative order of equals).
+- **Where the image goes**:  
+  _I will place the lesson pseudo-code image here once added:_  
+  `![bubble-pseudocode](./docs/bubble_lesson_pseudocode.png)`
+
+#### 2) `my_aiv_vector_sort_bubble` — **Bubble Sort (control-flow variant)**
+> _“Inspired by lesson + forum discussions”_ — functionally similar, but the outer loop is an infinite `while(1)` broken when no swaps happen.
+
+- **Why keep both**: they are equivalent in complexity and correctness, but show two styles:
+  - **State-driven loop** (`while (swapped)`) vs **sentinel loop** (`while(1) { if(!swapped) break; }`).
+  - Useful to compare readability and control-flow patterns.
+- **Properties**: same as above — stable, O(n²) average/worst, O(n) best.
+
+#### 3) `aiv_vector_sort_quick` — **Quicksort with median-ish pivot**
+> _Short explain of the inner recursion (`quicksort_internal`)_
+
+- **Partitioning**:
+  - Select pivot as the **middle element**: `items[(left + right) / 2]`.  
+    (A simple strategy that often avoids worst-case on already sorted inputs compared to choosing `items[left]`.)
+  - Move `i` forward while `cmp(items[i], pivot) < 0`.  
+    Move `j` backward while `cmp(items[j], pivot) > 0`.
+  - When `i <= j`, **swap**, then increment `i` and decrement `j`.
+- **Recursion split**:
+  - After the partition loop finishes, the array is split into two subranges:
+    - `left..j` and `i..right`.
+  - Recurse on each **only if non-empty**:
+    ```c
+    if (left < j)  quicksort_internal(items, left, j, cmp);   // left partition
+    if (i < right) quicksort_internal(items, i, right, cmp);  // right partition
+    ```
+- **Why this approach**:
+  - **In-place** (no extra arrays), **average O(n log n)**, usually faster than bubble for non-trivial sizes.
+  - **Not stable** (swaps can reorder equals), which is acceptable here.
+- **Footnotes**:
+  - Worst-case **O(n²)** (e.g., adversarial data), but rare in practice with a center pivot.
+  - The two inner `while` loops together scan each element at most once per partition → **linear work per partition**.
+
+---
+
+### Update & Delete Operations
+
+#### `aiv_vector_set`
+```c
+void aiv_vector_set(aiv_vector_t *vector, size_t index, void *item) {
+    if (index >= vector->count) {
+        // out of vector range -> Nothing to do
+        return;
+    }
+    vector->items[index] = item;
+}
+
+#### Comparator & Hash
 
 -Comparator must return <0 / 0 / >0 to indicate order. The examples cast void* to int*.
 -Hash is configurable via aiv_dict_new_with_params; default is a DJB-style function (djb33x_hash).
