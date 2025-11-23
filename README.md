@@ -617,3 +617,256 @@ Stability: removing a node does not reorder remaining elements.
 Ownership: the list stores payload pointers only; it does not free user data.
 
 
+### Dictionary (Hash Map) — Approach & Rationale
+
+A separate-chaining hash map storing **keys as copies** and **values as raw pointers** (`void*`).  
+Design goals: predictable O(1) average operations, simple memory ownership rules, and clear debugability for this exercise.
+
+---
+
+#### Hashing & Equality
+
+- **Bucket index** is computed as:
+  ```
+  size_t hash = dict->hash_func(key, key_size);
+  size_t hash_index = hash % dict->hashmap_size;
+
+Default hash is a DJB-style function; callers can provide a custom one via aiv_dict_new_with_params.
+
+Key equality uses both length and bytes:
+node->key_size == key_size && memcmp(node->key, key, key_size) == 0
+This avoids false positives between differently sized binary keys and supports non-string keys.
+
+Collision handling: each bucket stores a singly linked list (aiv_dict_node_t* next).
+Why this approach
+Separate chaining is simple to implement and reason about: constant-time average access when the load factor (items/buckets) is controlled.
+---
+get & contains_key
+  ```
+void* aiv_dict_get(aiv_dict_t* dict, void* key, size_t key_size) {
+    size_t hash_index = dict->hash_func(key, key_size) % dict->hashmap_size;
+    for (aiv_dict_node_t* node = dict->hashmap[hash_index]; node; node = node->next) {
+        if (node->key_size == key_size && memcmp(node->key, key, key_size) == 0)
+            return node->value; // return stored pointer
+    }
+    return NULL;
+}
+
+bool aiv_dict_contains_key(aiv_dict_t* dict, void* key, size_t key_size) {
+    return aiv_dict_get(dict, key, key_size) != NULL;
+}
+
+  ```
+get does a bucket scan and returns the stored value pointer (no copy).
+
+contains_key is a thin wrapper around get for readability.
+
+Complexity: average O(1), worst O(n) (all items in one bucket).
+---
+remove — pointer surgery in the bucket list
+```
+bool aiv_dict_remove(aiv_dict_t* dict, void* key, size_t key_size) {
+    size_t hash_index = dict->hash_func(key, key_size) % dict->hashmap_size;
+    aiv_dict_node_t* node = dict->hashmap[hash_index];
+    aiv_dict_node_t* prev = NULL;
+
+    while (node) {
+        if (node->key_size == key_size && memcmp(node->key, key, key_size) == 0) {
+            if (prev) prev->next = node->next;        // unlink middle/tail
+            else      dict->hashmap[hash_index] = node->next; // unlink head
+
+            free(node->key);  // key was heap-copied in put(...)
+            free(node);       // value is NOT freed (see ownership below)
+            dict->items_count--;
+            return true;
+        }
+        prev = node;
+        node = node->next;
+    }
+    return false;
+}
+
+```
+Three cases handled explicitly: removing head, middle, or tail in the bucket list.
+
+Memory: the node and its copied key are freed; the value pointer is not freed (caller owns the pointee).
+
+Complexity: average O(1) (short bucket), worst O(n).
+---
+size & items_count — why keep a counter
+```
+size_t aiv_dict_get_size(aiv_dict_t* dict) { return dict->items_count; }
+size_t aiv_dict_get_hashmap_elements_size(aiv_dict_t* dict) { return dict->hashmap_size; }
+```
+items_count is a field in aiv_dict_t that is incremented in put and decremented in remove.
+
+Why: obtaining the number of pairs in O(1) without scanning all buckets. Scanning would be O(n) and slow for large maps.
+
+aiv_dict_get_hashmap_elements_size exposes the number of buckets (useful for load-factor diagnostics).
+
+---
+
+destroy — walking every bucket safely
+```
+void aiv_dict_destroy(aiv_dict_t* dict) {
+    if (!dict || !dict->hashmap) return;
+    for (size_t i = 0; i < dict->hashmap_size; ++i) {
+        aiv_dict_node_t* node = dict->hashmap[i];
+        while (node) {
+            aiv_dict_node_t* next = node->next;
+            free(node->key);   // key copy
+            free(node);        // node
+            node = next;
+        }
+    }
+    free(dict->hashmap);
+    dict->hashmap = NULL;
+    dict->items_count = 0;
+}
+```
+Frees every node in every bucket and the bucket array itself.
+
+Does not free values: the dictionary stores value pointers only (no deep copy). The caller owns the pointees.
+
+---
+Ownership Model (explicit)
+
+Keys: copied on put → freed by the dictionary.
+
+Values: stored as raw pointers → not freed by the dictionary. The caller controls their lifetime.
+
+This keeps put/get/remove simple and predictable for the exercise. If you need automatic value cleanup, add a user-provided deleter callback and call it during remove/destroy.
+
+Complexity Summary
+
+get / contains / put / remove: average O(1), worst O(n) (all items collide in one bucket).
+
+destroy: O(n + buckets).
+
+size: O(1) via items_count.
+
+## Conclusions and Complexity Recap
+
+This project explored three foundational **generic data structures** in C — `Vector`, `List`, and `Dictionary` — each representing a distinct approach to data storage, access, and efficiency.  
+While they all share genericity (storing `void*` pointers), they differ fundamentally in how they organize and manage memory, providing complementary use cases.
+
+---
+
+### 🧱 Structural Overview
+
+| Structure | Memory Layout | Access Pattern | Growth Strategy | Key Feature |
+|------------|----------------|----------------|-----------------|--------------|
+| **Vector** | Contiguous dynamic array (`void** items`) | Random access via index | Resized with `realloc` | Fast index-based access |
+| **List**   | Doubly linked nodes on the heap | Sequential traversal | Dynamic node allocation | Easy insert/remove anywhere |
+| **Dict**   | Hash map with separate chaining (linked lists per bucket) | Hashed key lookup | Static bucket array | Fast key-based retrieval |
+
+---
+
+### ⚙️ Complexity Comparison
+
+| Operation | Vector | List | Dictionary |
+|------------|---------|------|-------------|
+| **Access by index** | O(1) | O(n) | — |
+| **Search by key/value** | O(n) | O(n) | **O(1)** average, O(n) worst |
+| **Insertion (append)** | Amortized O(1) | O(1) at tail | **O(1)** average |
+| **Deletion** | O(n) (shift) | O(1) if node known, O(n) by search | **O(1)** average |
+| **Iteration / traversal** | O(n) | O(n) | O(n) across buckets |
+| **Memory overhead** | Low–medium | High (extra pointers per node) | Medium (buckets + nodes) |
+
+---
+
+### ⚡ When to Use Each
+
+#### **Vector**
+Best for:
+- Compact, cache-friendly storage (contiguous heap memory).
+- Random access by index.
+- Sorting or bulk processing where elements are dense and stable in memory.
+
+Avoid when:
+- You need frequent mid-array insertions or deletions (requires O(n) shifts).
+- Data size grows unpredictably and reallocations become costly.
+
+In this implementation:
+- Simple `realloc`-based growth was used (O(n) per insert worst case).  
+  In a production setting, a **geometric capacity expansion** (×2 strategy) would make pushes amortized O(1).
+
+---
+
+#### **List**
+Best for:
+- Dynamic collections with frequent insertions/removals anywhere.
+- When order matters but random access speed doesn’t.
+
+Trade-offs:
+- Each node adds two pointer fields (`prev`, `next`) → higher memory overhead.
+- Accessing by index or value requires linear traversal → O(n).
+- Cache performance is poorer than vectors (nodes scattered in heap).
+
+However:
+- Insert/remove operations are **stable** (do not disturb order).
+- The design cleanly separates pointer rewiring for **head/middle/tail**, making behavior predictable and memory-safe.
+
+---
+
+#### **Dictionary (Hash Map)**
+Best for:
+- Fast key-based lookup and association (e.g., symbol tables, configs).
+- Variable-size datasets where access time matters more than order.
+
+Characteristics:
+- Uses **separate chaining**: each bucket is a linked list.
+- Average O(1) `get`, `put`, and `remove` as long as buckets are well-distributed.
+- Keys are **copied** on insertion, values stored as **pointers** (caller owns the pointees).
+
+Trade-offs:
+- Worst-case O(n) per operation if all keys collide into one bucket.
+- No ordering between elements.
+- Slightly higher memory overhead due to buckets and per-node allocations.
+
+The added field `items_count` provides an **O(1)** `size()` operation and tracks current occupancy without rescanning buckets — crucial for performance diagnostics and future resizing logic.
+
+---
+
+### 🧠 Conceptual Summary
+
+| Aspect | Vector | List | Dictionary |
+|---------|---------|------|-------------|
+| **Data organization** | Sequential contiguous memory | Node-based doubly linked | Key → bucket → linked list |
+| **Memory allocation** | `realloc`-based resizing | `malloc` per node | `calloc` bucket array + `malloc` per node |
+| **Access style** | Index (positional) | Sequential | Hash key (content-based) |
+| **Stability** | Indexes shift on delete | Preserved order | Unordered |
+| **Ownership model** | Stores pointers only | Stores pointers only | Copies keys, stores pointer values |
+| **Debug helpers** | `aiv_vector_print_int()` | `aiv_list_print()` | `aiv_dict_debug_print_ints()` |
+| **Ideal use-case** | Fixed-type arrays, sorting, numeric data | Queue-like operations, dynamic sequences | Lookups, maps, caching |
+
+---
+
+### 🧩 Practical Reflections
+
+- **Vector** → Efficiency and simplicity when array-like access dominates; best suited for datasets with stable or known size and frequent reads.  
+- **List** → Flexibility and structural clarity; ideal for workloads with unpredictable insertions and deletions but small scale.  
+- **Dictionary** → Abstraction of direct addressing; trades a bit of memory for **dramatic speedups** in lookup-heavy contexts.
+
+Each structure demonstrates a different **memory–speed trade-off**:
+- **Vector** emphasizes **spatial locality** (cache performance).
+- **List** emphasizes **flexibility** (easy growth/shrink).
+- **Dict** emphasizes **constant-time access** (hashing efficiency).
+
+In real-world systems, these structures often coexist:
+- A `dict` mapping keys → vectors or lists.
+- Lists used internally to handle hash collisions.
+- Vectors used to hold dictionary entries after flattening for iteration.
+
+---
+
+### 🏁 Final Takeaway
+
+This exercise highlights the fundamental **trade-offs between data locality, flexibility, and lookup complexity** in low-level C memory management:
+
+> - **Vector** → fast but rigid  
+> - **List** → flexible but sequential  
+> - **Dictionary** → scalable but unordered  
+
+Together, they form the essential building blocks behind most higher-level data containers found in modern languages and standard libraries.
+
