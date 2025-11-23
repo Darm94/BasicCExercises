@@ -212,3 +212,180 @@ matrix_array.data[1][2] = 9;
 int_matrix_array_print(matrix_array);
 
 destroy_int_matrix_array(matrix_array);
+```
+
+## (4) Generic Containers — Vector, List, Dictionary (Hash Map)
+
+This exercise implements three **generic data structures in C** using `void*`:
+- **`aiv_vector`** – dynamic array with index access, push, set/delete, and multiple sorting algorithms via user-provided comparator.
+- **`aiv_list`** – **doubly linked list** with O(1) tail append, get/set/remove by index, and a simple debug printer.
+- **`aiv_dict`** – **hash map** with separate chaining (linked lists in buckets), supporting put/get/contains/remove and a debug printer for integer keys/values.
+
+All containers are **generic**: they store pointers to user-managed data (`void*`). Comparisons and value interpretation are delegated to the caller (via comparator functions or explicit casts).
+
+---
+
+### Files
+- `main.c` — showcases the three structures with small demos (push/print/sort/remove/lookup).
+- `aiv_vector.h/.c` — vector and sorting algorithms (bubble variants + quicksort).
+- `aiv_list.h/.c` — doubly linked list core ops and utilities.
+- `aiv_dict.h/.c` — hash map with configurable hash function (default DJB variant).
+
+---
+
+### API Overview
+
+#### Vector (`aiv_vector`)
+```c
+aiv_vector_t aiv_vector_new();                        // items=NULL, count=0, capacity=10 (initial hint)
+void           aiv_vector_destroy(aiv_vector_t* v);   // frees internal array, resets fields
+void           aiv_vector_add(aiv_vector_t* v, void* item);     // append (current impl uses realloc each time)
+void*          aiv_vector_at(aiv_vector_t* v, size_t index);    // NULL if out-of-bounds
+void           aiv_vector_set(aiv_vector_t* v, size_t index, void* item);
+void           aiv_vector_delete(aiv_vector_t* v, size_t index); // shift left + shrink via realloc
+
+// Sorting (require int (*cmp)(void*,void*), returning <0 / 0 / >0):
+void aiv_vector_sort_bubble(aiv_vector_t* v, int (*cmp)(void*,void*));
+void aiv_vector_sort_bubble2(aiv_vector_t* v, int (*cmp)(void*,void*)); // early-exit
+void my_aiv_vector_sort_bubble(aiv_vector_t* v, int (*cmp)(void*,void*)); // personal variant
+void aiv_vector_sort_quick(aiv_vector_t* v, int (*cmp)(void*,void*));     // average O(n log n)
+
+// Debug helper for int* vectors:
+void aiv_vector_print_int(aiv_vector_t* v);
+```
+Complexity (typical): access O(1); append amortized O(1) (see “Improvements”); delete O(n); bubble O(n²); quicksort avg O(n log n).
+
+#### List (aiv_list)
+
+
+```
+aiv_list_t aiv_list_new();
+void       aiv_list_destroy(aiv_list_t* list);
+void       aiv_list_add(aiv_list_t* list, void* item);      // append at tail O(1)
+bool       aiv_list_is_empty(aiv_list_t* list);
+
+size_t     aiv_list_get_size(aiv_list_t* list);
+void*      aiv_list_get_item_at(aiv_list_t* list, size_t index);  // O(n)
+bool       aiv_list_set_item_at(aiv_list_t* list, size_t index, void* item); // O(n)
+bool       aiv_list_remove_item(aiv_list_t* list, void* item); // identity-based match
+bool       aiv_list_remove_item_at(aiv_list_t* list, size_t index);
+void       aiv_list_print(aiv_list_t* list); // debug helper for int*
+```
+Complexity (typical): append O(1); indexed access/removal O(n).
+
+#### Dictionary (aiv_dict)
+
+```
+aiv_dict_t aiv_dict_new(); // default buckets + DJB-like hash
+aiv_dict_t aiv_dict_new_with_params(size_t buckets, size_t (*hash)(void*, size_t));
+
+void   aiv_dict_put(aiv_dict_t* d, void* key, size_t key_size, void* value);
+// NOTE: key is copied (size = key_size). Value pointer is stored as-is (no deep copy).
+
+void*  aiv_dict_get(aiv_dict_t* d, void* key, size_t key_size);
+bool   aiv_dict_contains_key(aiv_dict_t* d, void* key, size_t key_size);
+bool   aiv_dict_remove(aiv_dict_t* d, void* key, size_t key_size);
+
+size_t aiv_dict_get_size(aiv_dict_t* d);                      // number of stored pairs
+size_t aiv_dict_get_hashmap_elements_size(aiv_dict_t* d);     // bucket count
+void   aiv_dict_destroy(aiv_dict_t* d);                       // frees keys + nodes, not user values
+
+// Debug printer for integer keys/values:
+void   aiv_dict_debug_print_ints(aiv_dict_t* d);
+```
+Notes: collisions handled with linked lists per bucket; key comparison = key_size + memcmp.
+
+### Demos (excerpt from main.c)
+#### Comparator for integers
+```
+int compare_int(void* a, void* b) {
+    int x = *(int*)a, y = *(int*)b;
+    return (x < y) ? -1 : (x > y);
+}
+```
+#### Vector
+```
+int array[5] = {3, 5, 2, 1, 4};
+aiv_vector_t v = aiv_vector_new();
+for (int i = 0; i < 5; ++i) aiv_vector_add(&v, &array[i]);
+
+puts("=== BUBBLE SORT 2 ===");
+aiv_vector_print_int(&v);
+puts("=== NOW order ===");
+aiv_vector_sort_bubble2(&v, compare_int);
+aiv_vector_print_int(&v);
+
+puts("=== Deletion (index 4 and 3) ===");
+aiv_vector_delete(&v, 4);
+aiv_vector_delete(&v, 3);
+aiv_vector_print_int(&v);
+aiv_vector_destroy(&v);
+```
+#### List
+```
+aiv_list_t list = aiv_list_new();
+int a = 10, b = 20, c = 30;
+aiv_list_add(&list, &a);
+aiv_list_add(&list, &b);
+aiv_list_add(&list, &c);
+
+printf("Head: %d | Tail: %d\n", *(int*)list.head->data, *(int*)list.tail->data);
+printf("Size: %llu\n", aiv_list_get_size(&list));
+
+int nv = 99;
+aiv_list_set_item_at(&list, 1, &nv);
+aiv_list_remove_item_at(&list, 1);
+aiv_list_remove_item(&list, &c);
+aiv_list_destroy(&list);
+
+```
+
+#### Dictionary
+```
+// DJB-like hash already available in aiv_dict.c; you can also pass a custom one:
+aiv_dict_t dict = aiv_dict_new_with_params(8, djb33x_hash);
+
+int k1=4,v1=2, k2=8,v2=6, k3=5,v3=1, k4=6,v4=8;
+aiv_dict_put(&dict, &k1, sizeof(int), &v1);
+aiv_dict_put(&dict, &k2, sizeof(int), &v2);
+aiv_dict_put(&dict, &k3, sizeof(int), &v3);
+aiv_dict_put(&dict, &k4, sizeof(int), &v4);
+
+printf("Hashmap buckets: %llu\n", aiv_dict_get_hashmap_elements_size(&dict));
+printf("Pairs count:    %llu\n", aiv_dict_get_size(&dict));
+aiv_dict_debug_print_ints(&dict);
+
+int q = 8;
+int* pv = (int*)aiv_dict_get(&dict, &q, sizeof(int));
+if (pv) printf("Get(%d) = %d\n", q, *pv);
+
+aiv_dict_remove(&dict, &k1, sizeof(int));
+aiv_dict_destroy(&dict);
+
+```
+#### Sample Output (abridged)
+```
+=== VECTOR PART ===
+vector2[0] = 3
+...
+=== NOW order ===
+vector2[0] = 1
+...
+=== LIST PART ===
+Head: 10 | Tail: 30
+Size: 3
+...
+=== DICT PART ===
+Hashmap buckets: 8
+Pairs count:    4
+[0] --> (k:...,v:...) ...
+Get(8) = 6
+After remove:
+Pairs count:    3
+```
+
+Comparator & Hash
+
+-Comparator must return <0 / 0 / >0 to indicate order. The examples cast void* to int*.
+-Hash is configurable via aiv_dict_new_with_params; default is a DJB-style function (djb33x_hash).
+
