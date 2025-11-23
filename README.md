@@ -752,7 +752,7 @@ While they all share genericity (storing `void*` pointers), they differ fundamen
 
 ---
 
-### 🧱 Structural Overview
+### Structural Overview
 
 | Structure | Memory Layout | Access Pattern | Growth Strategy | Key Feature |
 |------------|----------------|----------------|-----------------|--------------|
@@ -762,7 +762,7 @@ While they all share genericity (storing `void*` pointers), they differ fundamen
 
 ---
 
-### ⚙️ Complexity Comparison
+### Complexity Comparison
 
 | Operation | Vector | List | Dictionary |
 |------------|---------|------|-------------|
@@ -775,7 +775,7 @@ While they all share genericity (storing `void*` pointers), they differ fundamen
 
 ---
 
-### ⚡ When to Use Each
+### When to Use Each
 
 #### **Vector**
 Best for:
@@ -828,7 +828,7 @@ The added field `items_count` provides an **O(1)** `size()` operation and tracks
 
 ---
 
-### 🧠 Conceptual Summary
+### Conceptual Summary
 
 | Aspect | Vector | List | Dictionary |
 |---------|---------|------|-------------|
@@ -842,7 +842,7 @@ The added field `items_count` provides an **O(1)** `size()` operation and tracks
 
 ---
 
-### 🧩 Practical Reflections
+### Practical Reflections
 
 - **Vector** → Efficiency and simplicity when array-like access dominates; best suited for datasets with stable or known size and frequent reads.  
 - **List** → Flexibility and structural clarity; ideal for workloads with unpredictable insertions and deletions but small scale.  
@@ -860,7 +860,7 @@ In real-world systems, these structures often coexist:
 
 ---
 
-### 🏁 Final Takeaway
+### Final Takeaway
 
 This exercise highlights the fundamental **trade-offs between data locality, flexibility, and lookup complexity** in low-level C memory management:
 
