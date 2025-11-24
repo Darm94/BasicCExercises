@@ -17,7 +17,7 @@ This repository contains this main exercises:
 
 
 ---
-##(1) Print Command-Line Arguments
+## (1) Print Command-Line Arguments
 
 
 A simple program that prints all arguments passed to `main()` using `argc` and `argv`.
@@ -33,7 +33,7 @@ Argument 3: 123
 ```
 
 ---
-##(2) Strings Functions
+## (2) Strings Functions
 
 
 This exercise constist to reimplements standard C string functions to try to think about and understand how they work internally.
@@ -74,7 +74,7 @@ Length of string_5: 7
    --BYE TO THE NEXT EXERCISE!---
 ```
 ---
-##(3) Memory Functions & Dynamic Matrices
+## (3) Memory Functions & Dynamic Matrices
 
 
 This exercise focuses on **dynamic memory allocation in C** and on the use of standard functions such as `malloc`, `calloc`, `realloc`, and `free`.  
@@ -232,7 +232,7 @@ destroy_int_matrix_array(matrix_array);
 ```
 
 ---
-##(4) Generic Containers — Vector, List, Dictionary (&Hash Maps)
+## (4) Generic Containers — Vector, List, Dictionary (&Hash Maps)
 
 
 This exercise implements three **generic data structures in C** using `void*`:
