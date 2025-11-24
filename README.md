@@ -9,10 +9,16 @@ These exercises reimplement core C standard library functions and demonstrate ho
 
 ##  Overview
 
-This repository contains two main exercises:
+This repository contains this main exercises:
+- (1) Print Command-Line Arguments
+- (2) Strings Functions
+- (3) Memory Functions & Dynamic Matrices
+- (4) Generic Containers — Vector, List, Dictionary (&Hash Maps)
 
-(1) Print Command-Line Arguments
+
 ---
+##(1) Print Command-Line Arguments
+
 
 A simple program that prints all arguments passed to `main()` using `argc` and `argv`.
 This helped to understand how arguments are handled in C programs and the structure of the `argv` array and the role of `argc`.
@@ -26,8 +32,9 @@ Argument 2: world
 Argument 3: 123
 ```
 
-(2) Strings Functions
 ---
+##(2) Strings Functions
+
 
 This exercise constist to reimplements standard C string functions to try to think about and understand how they work internally.
 
@@ -66,9 +73,9 @@ Length of string_1: 5
 Length of string_5: 7
    --BYE TO THE NEXT EXERCISE!---
 ```
-
-(3) Memory Functions & Dynamic Matrices
 ---
+##(3) Memory Functions & Dynamic Matrices
+
 
 This exercise focuses on **dynamic memory allocation in C** and on the use of standard functions such as `malloc`, `calloc`, `realloc`, and `free`.  
 The goal was to understand how memory is managed and to reimplement some of these functions manually, to see what they really do behind the scenes.
@@ -82,9 +89,10 @@ The goal was to understand how memory is managed and to reimplement some of thes
 
 These were tested against their standard counterparts to understand their behavior with different data types (especially the effect of `memset` on `int` arrays when the value is greater than 0).
 
----
+
 
 ### Dynamic Matrices Implementations
+---
 
 In the last part, two different implementations of a **matrix structure** are compared.
 
@@ -124,9 +132,11 @@ Thats the more typical approach for matrix in C (according to university courses
 - Multiple allocations → can be more slower and exposed to memory overhead
 - int he heap the allocations are not contiguos so also the Rows are not contiguous → can be less efficient
 
+
+
+Example Output
 ---
 
-### Example Output
 ================ MALLOC dyn. array of size 3: ================
 
 
@@ -167,9 +177,10 @@ num[2] = 1684300900
 #### (c) Conclusions
 In my opinion both of these approaches are convenient depending on the situation, although approach (b) is more flexible and easier to handle with array-like access (matrix[0][5]) causing much less confusion. For both of them I decided to rely on a struct which in my opinion is the best way to manage the data related to the matrix without going crazy.
 
----
 
-### Matrix Functions Overview
+
+Matrix Functions Overview
+---
 
 The matrix management logic has been organized into specific helper functions declared in `matrix_functions.h` and implemented in `matrix_functions.c`.  
 These functions make it easier to create, initialize, modify, print, and free both types of dynamic matrices.
@@ -220,8 +231,9 @@ int_matrix_array_print(matrix_array);
 destroy_int_matrix_array(matrix_array);
 ```
 
-(4) Generic Containers — Vector, List, Dictionary (Hash Map)
 ---
+##(4) Generic Containers — Vector, List, Dictionary (&Hash Maps)
+
 
 This exercise implements three **generic data structures in C** using `void*`:
 - **`aiv_vector`** – dynamic array with index access, push, set/delete, and multiple sorting algorithms via user-provided comparator.
@@ -230,9 +242,10 @@ This exercise implements three **generic data structures in C** using `void*`:
 
 All containers are **generic**: they store pointers to user-managed data (`void*`). Comparisons and value interpretation are delegated to the caller (via comparator functions or explicit casts).
 
----
 
+---
 ### Files
+
 - `main.c` — showcases the three structures with small demos (push/print/sort/remove/lookup).
 - `aiv_vector.h/.c` — vector and sorting algorithms (bubble variants + quicksort).
 - `aiv_list.h/.c` — doubly linked list core ops and utilities.
