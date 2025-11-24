@@ -11,7 +11,9 @@ These exercises reimplement core C standard library functions and demonstrate ho
 
 This repository contains two main exercises:
 
-### (1) Print Command-Line Arguments
+(1) Print Command-Line Arguments
+---
+
 A simple program that prints all arguments passed to `main()` using `argc` and `argv`.
 This helped to understand how arguments are handled in C programs and the structure of the `argv` array and the role of `argc`.
 
@@ -24,7 +26,9 @@ Argument 2: world
 Argument 3: 123
 ```
 
-### (2) Strings Functions
+(2) Strings Functions
+---
+
 This exercise constist to reimplements standard C string functions to try to think about and understand how they work internally.
 
 **Implemented functions**
@@ -62,7 +66,9 @@ Length of string_1: 5
 Length of string_5: 7
    --BYE TO THE NEXT EXERCISE!---
 ```
-## (3) Memory Functions & Dynamic Matrices
+
+(3) Memory Functions & Dynamic Matrices
+---
 
 This exercise focuses on **dynamic memory allocation in C** and on the use of standard functions such as `malloc`, `calloc`, `realloc`, and `free`.  
 The goal was to understand how memory is managed and to reimplement some of these functions manually, to see what they really do behind the scenes.
@@ -214,7 +220,8 @@ int_matrix_array_print(matrix_array);
 destroy_int_matrix_array(matrix_array);
 ```
 
-## (4) Generic Containers — Vector, List, Dictionary (Hash Map)
+(4) Generic Containers — Vector, List, Dictionary (Hash Map)
+---
 
 This exercise implements three **generic data structures in C** using `void*`:
 - **`aiv_vector`** – dynamic array with index access, push, set/delete, and multiple sorting algorithms via user-provided comparator.
@@ -634,13 +641,6 @@ Frees every node in every bucket and the bucket array itself.
 Does not free values: the dictionary stores value pointers only (no deep copy). The caller owns the pointees.
 
 ---
-#### Ownership Model (explicit)
-
-Keys: copied on put → freed by the dictionary.
-
-Values: stored as raw pointers → not freed by the dictionary. The caller controls their lifetime.
-
-This keeps put/get/remove simple and predictable for the exercise. If you need automatic value cleanup, add a user-provided deleter callback and call it during remove/destroy.
 
 #### Complexity Summary
 
@@ -652,8 +652,8 @@ size: O(1) via items_count.
 
 ## Conclusions and Complexity Recap
 
-This project explored three foundational **generic data structures** in C — `Vector`, `List`, and `Dictionary` — each representing a distinct approach to data storage, access, and efficiency.  
-While they all share genericity (storing `void*` pointers), they differ fundamentally in how they organize and manage memory, providing complementary use cases.
+This project explored three  **generic data structures** in C language — `Vector`, `List`, and `Dictionary` — each representing a distinct approach to data storage, access, and efficiency.  
+This project description try to evidence the principal difference between those collection on how they organize and manage memory, providing complementary use cases.
 
 ---
 
@@ -730,38 +730,6 @@ Trade-offs:
 - Slightly higher memory overhead due to buckets and per-node allocations.
 
 The added field `items_count` provides an **O(1)** `size()` operation and tracks current occupancy without rescanning buckets — crucial for performance diagnostics and future resizing logic.
-
----
-
-### Conceptual Summary
-
-| Aspect | Vector | List | Dictionary |
-|---------|---------|------|-------------|
-| **Data organization** | Sequential contiguous memory | Node-based doubly linked | Key → bucket → linked list |
-| **Memory allocation** | `realloc`-based resizing | `malloc` per node | `calloc` bucket array + `malloc` per node |
-| **Access style** | Index (positional) | Sequential | Hash key (content-based) |
-| **Stability** | Indexes shift on delete | Preserved order | Unordered |
-| **Ownership model** | Stores pointers only | Stores pointers only | Copies keys, stores pointer values |
-| **Debug helpers** | `aiv_vector_print_int()` | `aiv_list_print()` | `aiv_dict_debug_print_ints()` |
-| **Ideal use-case** | Fixed-type arrays, sorting, numeric data | Queue-like operations, dynamic sequences | Lookups, maps, caching |
-
----
-
-### Practical Reflections
-
-- **Vector** → Efficiency and simplicity when array-like access dominates; best suited for datasets with stable or known size and frequent reads.  
-- **List** → Flexibility and structural clarity; ideal for workloads with unpredictable insertions and deletions but small scale.  
-- **Dictionary** → Abstraction of direct addressing; trades a bit of memory for **dramatic speedups** in lookup-heavy contexts.
-
-Each structure demonstrates a different **memory–speed trade-off**:
-- **Vector** emphasizes **spatial locality** (cache performance).
-- **List** emphasizes **flexibility** (easy growth/shrink).
-- **Dict** emphasizes **constant-time access** (hashing efficiency).
-
-In real-world systems, these structures often coexist:
-- A `dict` mapping keys → vectors or lists.
-- Lists used internally to handle hash collisions.
-- Vectors used to hold dictionary entries after flattening for iteration.
 
 ---
 
