@@ -456,10 +456,11 @@ The vector stores `void*` items in a resizable array. Core goals:
   - The two inner `while` loops together scan each element at most once per partition → **linear work per partition**.
 
 
+
 ### Update & Delete Operations
 
 #### `aiv_vector_set`
-```c
+```
 void aiv_vector_set(aiv_vector_t *vector, size_t index, void *item) {
     if (index >= vector->count) {
         // out of vector range -> Nothing to do
@@ -468,17 +469,36 @@ void aiv_vector_set(aiv_vector_t *vector, size_t index, void *item) {
     vector->items[index] = item;
 }
 ```
-#### Comparator & Hash
+- Why: a minimal, safe update that avoids undefined behavior by guarding against out-of-bounds writes.
+- Behavior: silent no-op on invalid index; keeps the API compact and side-effect free when the input is wrong.
 
-- **Comparator must return <0 / 0 / >0 to indicate order. The examples cast void* to int*.**
-- **Hash is configurable via aiv_dict_new_with_params; default is a DJB-style function (djb33x_hash).**
+  
+#### `aiv_vector_delete`
+```
+
+
+
+
+
+```
+- How it works: shifts all elements after index one position to the left, decrements count, and (in this exercise) shrinks the storage with realloc to match the new size.
+- Trade-off: clear memory hygiene for the exercise; in production you often keep capacity to reduce realloc/shrink churn.
+#### Complexity Summary
+- Insert (append): amortized O(1) with geometric growth (current simple realloc-per-push can degrade to O(n)).
+- Get (at): O(1).
+- Set (set): O(1) (bounds-checked pointer write).
+- Remove (delete): O(n) (left shift of the tail segment).
+  
+#### Comparator 
+The vector is type-generic: it stores void* items. Ordering is provided by different user-customizable comparators:
+Every Comparator must return < 0 if a < b, 0 if equal, > 0 if a > b.
+Examples in this repo cast void* to int*, but any payload type is supported as long as the comparator knows how to compare it.
 
 ---
 
 ## List — Approach & Rationale
 
 A **doubly linked list** storing `void*` payloads. The design favors a small, predictable API with indexed helpers (for demos) and pointer-based removal.
-
 
 #### Core Accessors
 
@@ -488,12 +508,10 @@ void*  aiv_list_get_item_at(aiv_list_t* list, size_t index);
 bool   aiv_list_set_item_at(aiv_list_t* list, size_t index, void* item);
 ```
 
-get_size returns the tracked node count; O(1).
-
-get_item_at traverses from head forward until index; O(n).
+- get_size returns the tracked node count; O(1).
+- get_item_at traverses from head forward until index; O(n).
 Returns NULL on out-of-bounds or an empty list. The final current ? current->data : NULL is a null-safety guard.
-
-set_item_at repeats the same traversal and replaces only the payload (current->data = item), preserving the node itself.
+- set_item_at repeats the same traversal and replaces only the payload (current->data = item), preserving the node itself.
 Returns false on invalid index; this avoids UB and lets the caller branch on success/failure.
 
 Why this approach
@@ -536,7 +554,7 @@ Why this approach
 Explicit head/middle/tail branches keep the code readable and prevent dereferencing NULL neighbors.
 Removal is stable for the remaining elements (relative order of other nodes is preserved).
 
-#### Complexity & Behavior ####
+#### Complexity Summary
 
 - Append (not shown here, via aiv_list_add): O(1) with tail pointer.
 - get_item_at / set_item_at / remove_item_at: O(n) (linear traversal).
@@ -650,7 +668,6 @@ void aiv_dict_destroy(aiv_dict_t* dict) {
 }
 ```
 Frees every node in every bucket and the bucket array itself.
-
 Does not free values: the dictionary stores value pointers only (no deep copy). The caller owns the pointees.
 
 ---
@@ -659,7 +676,7 @@ Does not free values: the dictionary stores value pointers only (no deep copy). 
 
 get / contains / put / remove: average O(1), worst O(n) (all items collide in one bucket).
 
-destroy: O(n + buckets).
+destroy: O(n + n buckets).
 
 size: O(1) via items_count.
 
