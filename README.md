@@ -92,7 +92,6 @@ These were tested against their standard counterparts to understand their behavi
 
 
 ### Dynamic Matrices Implementations
----
 
 In the last part, two different implementations of a **matrix structure** are compared.
 
@@ -231,6 +230,8 @@ int_matrix_array_print(matrix_array);
 destroy_int_matrix_array(matrix_array);
 ```
 
+
+
 ---
 ## (4) Generic Containers — Vector, List, Dictionary (&Hash Maps)
 
@@ -256,7 +257,7 @@ All containers are **generic**: they store pointers to user-managed data (`void*
 ### API Overview
 
 #### Vector (`aiv_vector`)
-```c
+```
 aiv_vector_t aiv_vector_new();                        // items=NULL, count=0, capacity=10 (initial hint)
 void           aiv_vector_destroy(aiv_vector_t* v);   // frees internal array, resets fields
 void           aiv_vector_add(aiv_vector_t* v, void* item);     // append (current impl uses realloc each time)
@@ -406,7 +407,6 @@ The vector stores `void*` items in a resizable array. Core goals:
 - **Simple API**: push (`add`), indexed access (`at`), bounded set (`set`), delete (shift+shrink), and sorting (bubble variants + quicksort).
 - **Different Sorting Ways**: This data collection configuration certainly allows for different ways to sequentially sort the data based on simplicity, stability, or performance needs. Below, we'll show a couple of selectable sorting examples, which in turn can be implemented in different ways.
 
----
 
 #### Other Sorting Choices after Bubble Sort seen at lesson:
 
