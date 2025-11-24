@@ -451,9 +451,9 @@ The vector stores `void*` items in a resizable array. Core goals:
 - **Why this approach**:
   - **In-place** (no extra arrays), **average O(n log n)**, usually faster than bubble for non-trivial sizes.
   - **Not stable** (swaps can reorder equals), which is acceptable here.
-- **Footnotes**:
+- **Important notes**:
   - Worst-case **O(n²)** (e.g., adversarial data), but rare in practice with a center pivot.
-  - The two inner `while` loops together scan each element at most once per partition → **linear work per partition**.
+  
 
 
 
@@ -476,18 +476,38 @@ void aiv_vector_set(aiv_vector_t *vector, size_t index, void *item) {
 #### `aiv_vector_delete`
 ```
 
+bool aiv_dict_remove(aiv_dict_t* dict, void* key, size_t key_size) {
+    size_t hash = dict->hash_func(key, key_size);
+    size_t hash_index = hash % dict->hashmap_size;
 
+    aiv_dict_node_t* node = dict->hashmap[hash_index];
+    aiv_dict_node_t* prev = NULL;
 
+    while (node) {
+        //key match
+        if (node->key_size == key_size && memcmp(node->key, key, key_size) == 0) {
+            if (prev) prev->next = node->next;//not first element
+            else      dict->hashmap[hash_index] = node->next;//first element
 
-
+            free(node->key);
+            free(node);
+            dict->items_count--;
+            return true;
+        }
+        //node scroll
+        prev = node;
+        node = node->next;
+    }
+    return false;
+}
 ```
-- How it works: shifts all elements after index one position to the left, decrements count, and (in this exercise) shrinks the storage with realloc to match the new size.
-- Trade-off: clear memory hygiene for the exercise; in production you often keep capacity to reduce realloc/shrink churn.
+- **How it works**: shifts all elements after index one position to the left, decrements count, and (in this exercise) shrinks the storage with realloc to match the new size.
+  
 #### Complexity Summary
-- Insert (append): amortized O(1) with geometric growth (current simple realloc-per-push can degrade to O(n)).
-- Get (at): O(1).
-- Set (set): O(1) (bounds-checked pointer write).
-- Remove (delete): O(n) (left shift of the tail segment).
+- **Insert (append)**: current simple realloc-per-push can degrade to O(n) , on web you can find amortized techniques to reach O(1).
+- **Get (at)**: O(1).
+- **Set (set)**: O(1) (bounds-checked pointer write).
+- **Remove (delete)**: O(n) (left shift of the last segment).
   
 #### Comparator 
 The vector is type-generic: it stores void* items. Ordering is provided by different user-customizable comparators:
@@ -508,10 +528,10 @@ void*  aiv_list_get_item_at(aiv_list_t* list, size_t index);
 bool   aiv_list_set_item_at(aiv_list_t* list, size_t index, void* item);
 ```
 
-- get_size returns the tracked node count; O(1).
-- get_item_at traverses from head forward until index; O(n).
+- **get_size** returns the tracked node count; O(1).
+- **get_item_at** traverses from head forward until index; O(n).
 Returns NULL on out-of-bounds or an empty list. The final current ? current->data : NULL is a null-safety guard.
-- set_item_at repeats the same traversal and replaces only the payload (current->data = item), preserving the node itself.
+- **set_item_at** repeats the same traversal and replaces only the payload (current->data = item), preserving the node itself.
 Returns false on invalid index; this avoids UB and lets the caller branch on success/failure.
 
 Why this approach
@@ -522,9 +542,9 @@ Keep the API minimal and safe: explicit bounds checks, pointer-only assignment (
 bool aiv_list_remove_item(aiv_list_t* list, void* item);
 bool aiv_list_remove_item_at(aiv_list_t* list, size_t index);
 ```
-- remove_item searches by pointer identity (current->data == item) and removes the first match.
-- remove_item_at removes the node found at a specific index.
-- Both functions handle the three canonical cases:
+- **remove_item** searches by pointer identity (current->data == item) and removes the first match.
+- **remove_item_at** removes the node found at a specific index.
+- **Both** functions handle the three canonical cases:
 
 ##### 1.Head removal #####
 ```
@@ -578,13 +598,13 @@ Design goals: predictable O(1) average operations, simple memory ownership rules
 
 Default hash is a DJB-style function; callers can provide a custom one via aiv_dict_new_with_params.
 
-Key equality uses both length and bytes:
+Key equality comparation uses both length and bytes:
 node->key_size == key_size && memcmp(node->key, key, key_size) == 0
 This avoids false positives between differently sized binary keys and supports non-string keys.
 
 Collision handling: each bucket stores a singly linked list (aiv_dict_node_t* next).
 Why this approach
-Separate chaining is simple to implement and reason about: constant-time average access when the load factor (items/buckets) is controlled.
+Separate chaining is simple to implement and reason about: constant-time average access when the load factor (array elements/buckets) is controlled.
 
 #### get & contains_key
   ```
@@ -644,7 +664,6 @@ size_t aiv_dict_get_hashmap_elements_size(aiv_dict_t* dict) { return dict->hashm
 items_count is a field in aiv_dict_t that is incremented in put and decremented in remove.
 
 Why: obtaining the number of pairs in O(1) without scanning all buckets. Scanning would be O(n) and slow for large maps.
-
 aiv_dict_get_hashmap_elements_size exposes the number of buckets (useful for load-factor diagnostics).
 
 ---
@@ -674,11 +693,9 @@ Does not free values: the dictionary stores value pointers only (no deep copy). 
 
 #### Complexity Summary
 
-get / contains / put / remove: average O(1), worst O(n) (all items collide in one bucket).
-
-destroy: O(n + n buckets).
-
-size: O(1) via items_count.
+- **get / contains / put / remove**: average O(1), worst O(n) (all items collide in one bucket).
+- **destroy**: O(n + n buckets).
+- **size**: O(1) via items_count.
 
 ## Conclusions and Complexity Recap
 
