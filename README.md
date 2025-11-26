@@ -595,7 +595,7 @@ Design goals: predictable O(1) average operations, simple memory ownership rules
   ```
   size_t hash = dict->hash_func(key, key_size);
   size_t hash_index = hash % dict->hashmap_size;
-
+  ```
 Default hash is a DJB-style function; callers can provide a custom one via aiv_dict_new_with_params.
 
 Key equality comparation uses both length and bytes:
@@ -789,4 +789,73 @@ This exercise highlights the fundamental **trade-offs between data locality, fle
 > - **Dictionary** → scalable but unordered  
 
 Together, they form the essential building blocks behind most higher-level data containers found in modern languages and standard libraries.
+
+## (5) Unit Test
+This project includes a lightweight custom Unit Testing framework written in pure C.
+It requires no external libraries and is used to validate the core data structures implemented in the project (aiv_list, aiv_vector, aiv_dict, etc.).
+
+The goal is to provide a minimal, readable, and easily extendable testing layer.
+
+### AIV Unit Test Framework Overview
+
+The unit test framework is defined in aiv-unit.h and is built around three main components:
+
+1. AIV_UNIT_TEST(name) – Test Definition Macro
+
+Each test is declared using:
+
+AIV_UNIT_TEST(test_name) {
+    // test body
+}
+
+
+This expands to a simple void test_name() function, keeping test definitions clear and minimal.
+
+2. AIV_UNIT_RUNNER(...) – Automatic Test Runner
+
+To execute multiple tests, simply list them inside the AIV_UNIT_RUNNER macro:
+
+AIV_UNIT_RUNNER(
+    test_list_new,
+    test_list_add_one_item,
+    test_list_add_two_items,
+    test_list_destroy
+)
+
+
+The runner automatically:
+
+builds an array of test function pointers
+
+calls each test in sequence
+
+prints the total number of executed tests
+
+You do not need to write your own main() function — the macro generates it automatically.
+
+3. Assertion Macros
+
+Several assertion macros are provided to improve clarity and debugging:
+
+Macro	Description
+AIV_UNIT_IS_TRUE(expr)	Checks if an expression is true
+AIV_UNIT_IS_NULL(ptr)	Checks if a pointer is NULL
+AIV_UNIT_PTR_EQ(a, b)	Checks pointer equality
+AIV_UNIT_INT_EQ(a, b)	Checks integer equality
+AIV_UNIT_SIZE_EQ(a, b)	Checks size equality (size_t)
+
+If an assertion fails, the framework prints:
+
+- the test name
+- expected vs. actual values
+- file and line number
+
+Example failure output:
+
+test_list_new: expected NULL but was 0x7ffeefbff2c0 [src/main.c@42]
+
+### Implemented Unit Tests
+
+All tests are located in main.c.
+Below is a summary of the implemented test cases for aiv_list_t.
 
