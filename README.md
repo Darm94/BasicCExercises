@@ -810,26 +810,25 @@ AIV_UNIT_TEST(test_name) {
 
 
 This expands to a simple void test_name() function, keeping test definitions clear and minimal.
-
+```
 2. AIV_UNIT_RUNNER(...) – Automatic Test Runner
+```
 
 To execute multiple tests, simply list them inside the AIV_UNIT_RUNNER macro:
-
+```
 AIV_UNIT_RUNNER(
     test_list_new,
     test_list_add_one_item,
     test_list_add_two_items,
     test_list_destroy
 )
-
+```
 
 The runner automatically:
 
-builds an array of test function pointers
-
-calls each test in sequence
-
-prints the total number of executed tests
+- builds an array of test function pointers
+- calls each test in sequence
+- prints the total number of executed tests
 
 You do not need to write your own main() function — the macro generates it automatically.
 
