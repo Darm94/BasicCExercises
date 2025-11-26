@@ -798,31 +798,30 @@ The goal is to provide a minimal, readable, and easily extendable testing layer.
 
 ### AIV Unit Test Framework Overview
 
-The unit test framework is defined in aiv-unit.h and is built around three main components:
+The unit test framework is defined in `aiv-unit.h` and is built around three main components:
 
-1. AIV_UNIT_TEST(name) – Test Definition Macro
+#### 1. `AIV_UNIT_TEST(name)` – Test Definition Macro
 
 Each test is declared using:
-
+```
 AIV_UNIT_TEST(test_name) {
     // test body
 }
-
+```
 
 This expands to a simple void test_name() function, keeping test definitions clear and minimal.
-```
-2. AIV_UNIT_RUNNER(...) – Automatic Test Runner
-```
+
+#### 2. AIV_UNIT_RUNNER(...) – Automatic Test Runner
 
 To execute multiple tests, simply list them inside the AIV_UNIT_RUNNER macro:
-```
+
 AIV_UNIT_RUNNER(
     test_list_new,
     test_list_add_one_item,
     test_list_add_two_items,
     test_list_destroy
 )
-```
+
 
 The runner automatically:
 
@@ -830,22 +829,17 @@ The runner automatically:
 - calls each test in sequence
 - prints the total number of executed tests
 
-You do not need to write your own main() function — the macro generates it automatically.
+You do not need to write your own `main()` function — the macro generates it automatically.
 
-3. Assertion Macros
+#### 3. Assertion Macros
 
 Several assertion macros are provided to improve clarity and debugging:
 
 Macro	Description
-
 AIV_UNIT_IS_TRUE(expr)	Checks if an expression is true
-
 AIV_UNIT_IS_NULL(ptr)	Checks if a pointer is NULL
-
 AIV_UNIT_PTR_EQ(a, b)	Checks pointer equality
-
 AIV_UNIT_INT_EQ(a, b)	Checks integer equality
-
 AIV_UNIT_SIZE_EQ(a, b)	Checks size equality (size_t)
 
 If an assertion fails, the framework prints:
