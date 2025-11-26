@@ -836,7 +836,7 @@ You do not need to write your own `main()` function — the macro generates it a
 Several assertion macros are provided to improve clarity and debugging:
 
 | Macro signature | Macro	Description |
-|------------|---------|------|-------------|
+|-----------------|--------------------|
 |`AIV_UNIT_IS_TRUE(expr)`	Checks if an expression is true|
 |`AIV_UNIT_IS_NULL(ptr)`	Checks if a pointer is NULL|
 |`AIV_UNIT_PTR_EQ(a, b)`	Checks pointer equality|
