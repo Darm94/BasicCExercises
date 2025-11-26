@@ -837,11 +837,11 @@ Several assertion macros are provided to improve clarity and debugging:
 
 | Macro signature | Macro	Description |
 |-----------------|--------------------|
-|`AIV_UNIT_IS_TRUE(expr)`	Checks if an expression is true|
-|`AIV_UNIT_IS_NULL(ptr)`	Checks if a pointer is NULL|
-|`AIV_UNIT_PTR_EQ(a, b)`	Checks pointer equality|
-|`AIV_UNIT_INT_EQ(a, b)`	Checks integer equality|
-|`AIV_UNIT_SIZE_EQ(a, b)`	Checks size equality (size_t)|
+|`AIV_UNIT_IS_TRUE(expr)` | Checks if an expression is true|
+|`AIV_UNIT_IS_NULL(ptr)` |	Checks if a pointer is NULL|
+|`AIV_UNIT_PTR_EQ(a, b)` |	Checks pointer equality|
+|`AIV_UNIT_INT_EQ(a, b)` |	Checks integer equality|
+|`AIV_UNIT_SIZE_EQ(a, b)` | Checks size equality (size_t)|
 
 If an assertion fails, the framework prints:
 
