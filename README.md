@@ -855,6 +855,11 @@ test_list_new: expected NULL but was 0x7ffeefbff2c0 [src/main.c@42]
 
 ### Implemented Unit Tests
 
-All tests are located in main.c.
-Below is a summary of the implemented test cases for aiv_list_t.
+All tests are implemented in `main.c` and cover the core behaviors of `aiv_list_t`.  
+Here is a brief summary of the test cases:
+
+- **`test_list_new`** — verifies correct initialization (empty list, null pointers, zero count)
+- **`test_list_add_one_item`** — checks insertion of a single element and correct node linkage
+- **`test_list_add_two_items`** — ensures proper head/tail updates and bidirectional links when adding two elements
+- **`test_list_destroy`** — confirms complete list cleanup and reset of internal pointers and counters
 
