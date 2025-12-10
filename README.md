@@ -864,38 +864,38 @@ Here is a brief summary of the test cases:
 - **`test_list_add_two_items`** — ensures proper head/tail updates and bidirectional links when adding two elements
 - **`test_list_destroy`** — confirms complete list cleanup and reset of internal pointers and counters
 
-## (6) Unit Test con Clove-Unit (`aiv_vector`)
+## (6) Unit Test with Clove-Unit (`aiv_vector`)
 
-In questo esercizio viene riscritta la suite di test per `aiv_vector` utilizzando  
-la libreria di unit testing **clove-unit** di *Federico De Felici*.
+In this exercise, the test suite for `aiv_vector` is rewritten using  
+the **clove-unit** testing library by *Federico De Felici*.
 
-### Obiettivi dell'esercizio
+### Exercise Goals
 
-- usare una libreria di test “vera” invece di un framework scritto a mano  
-- mantenere i test semplici, leggibili e facilmente estendibili  
-- mostrare come costruire **wrapper tipizzati** per un vettore generico in C tramite macro  
+- use a “real” testing library instead of a hand-rolled framework  
+- keep tests simple, readable, and easy to extend  
+- demonstrate how to build **typed wrappers** for a generic C vector using macros  
 
-### Struttura dei file
+### File Structure
 
-Per questo esercizio i file principali sono:
+The main files for this exercise are:
 
 - **core/src/aiv_vector.c**  
-  Implementazione del vettore generico.
+  Implementation of the generic vector.
 - **core/include/aiv_vector.h**  
-  Definizione del tipo `aiv_vector_t` e delle macro `VECTOR_DEFINE`.
+  Definition of the `aiv_vector_t` type and the `VECTOR_DEFINE` macros.
 - **test/src/aiv_vector_test.c**  
-  Suite di test Clove-Unit per `aiv_vector`.
+  Clove-Unit test suite for `aiv_vector`.
 - **test/src/main.c**  
-  Entry point dei test, contiene `CLOVE_RUNNER()`.
+  Test entry point, containing `CLOVE_RUNNER()`.
 - **build-core.bat**  
-  Script per compilare la libreria core.
+  Script to compile the core library.
 - **build-test.bat**  
-  Script per compilare ed eseguire i test.
+  Script to compile and run the tests.
 
-### Implementazione di `aiv_vector`
+### Implementation of `aiv_vector`
 
-Il vettore è generico: memorizza elementi di dimensione arbitraria usando  
-`item_size` e `void* items`:
+The vector is generic: it stores elements of arbitrary size using  
+`item_size` and `void* items`:
 
 ```
 typedef struct aiv_vector {
@@ -904,37 +904,37 @@ typedef struct aiv_vector {
     size_t item_size;
 } aiv_vector_t;
 ```
-### Funzioni principali
+### Main Functions
 
 #### `aiv_vector_init(aiv_vector_t* vector, size_t item_size)`
-Inizializza il vettore impostando:
+Initializes the vector by setting:
 - `items = NULL`
 - `count = 0`
-- `item_size` uguale alla dimensione del tipo degli elementi
+- `item_size` to the size of the element type
 
 ---
 
 #### `aiv_vector_add(aiv_vector_t* vector, void* item)`
-Aggiunge un elemento al vettore:
+Adds an element to the vector:
 
-- rialloca il buffer con `realloc`
-- calcola la posizione corretta in cui copiare l'elemento (in byte)
-- copia i dati usando `memcpy`
+- reallocates the buffer using `realloc`
+- computes the correct byte offset where the new element should be written
+- copies the data using `memcpy`
 
-Esempio del calcolo della destinazione:
+Example of how the destination address is calculated:
 
 ```
 uint8_t* mem_dest = (uint8_t*)vector->items + (vector->item_size * vector->count);
 memcpy(mem_dest, item, vector->item_size);
 ```
 #### `aiv_vector_get(aiv_vector_t* vector, size_t index)`
-Restituisce il puntatore all’elemento in posizione `index`:
+Returns a pointer to the element at position `index`:
 
 ```
 return (uint8_t*)vector->items + (vector->item_size * index);
 ```
 #### `aiv_vector_free(aiv_vector_t* vector)`
-Dealloca il buffer con `free` e resetta tutti i campi:
+Deallocates the buffer using `free` and resets all fields:
 
 - `items = NULL`
 - `count = 0`
@@ -942,9 +942,10 @@ Dealloca il buffer con `free` e resetta tutti i campi:
 
 ---
 
-### Tipizzazione con `VECTOR_DEFINE`
+### Typing with `VECTOR_DEFINE`
 
-Per evitare di lavorare sempre con `void*` e cast, in `aiv_vector.h` è stata definita la macro:
+To avoid working directly with `void*` and manual casts, the following macro  
+was defined in `aiv_vector.h`:
 
 ```c
 #define VECTOR_DEFINE(TYPE)                                                 \
@@ -960,7 +961,8 @@ Per evitare di lavorare sempre con `void*` e cast, in `aiv_vector.h` è stata de
         return *(TYPE*)aiv_vector_get(v, index);                            \
     }
 ```
-Usando questa macro si possono creare facilmente versioni tipizzate del vettore:
+
+Using this macro, you can easily create typed versions of the vector:
 ```
 VECTOR_DEFINE(int)
 VECTOR_DEFINE(float)
@@ -968,24 +970,192 @@ typedef int* int_ptr;
 VECTOR_DEFINE(int_ptr)
 ```
 
-Questa macro genera automaticamente funzioni come:
+This macro automatically generates functions such as:
 
 - `vector_int_init`, `vector_int_add`, `vector_int_get`
 - `vector_float_init`, `vector_float_add`, `vector_float_get`
 - `vector_int_ptr_init`, `vector_int_ptr_add`, `vector_int_ptr_get`
 
-In questo modo si ottiene:
+This results in:
 
-- un **tipo generico** sotto al cofano (`aiv_vector_t`)
-- un'**API tipizzata** in superficie, più leggibile e più sicura da usare
+- a **generic type** under the hood (`aiv_vector_t`)
+- a **typed API** on top, which is more readable and safer to use
 
-### Test con Clove-Unit
+### Tests with Clove-Unit
 
-La suite di test è definita nel file `test/src/aiv_vector_test.c`.  
-All’inizio del file viene dichiarato il nome della suite:
+The test suite is defined in the file `test/src/aiv_vector_test.c`.  
+At the beginning of the file, the suite name is declared:
 
 ```
 #define CLOVE_SUITE_NAME VectorSuite
 #include "clove-unit.h"
 #include "aiv_vector.h"
 ```
+
+### Tests on the “raw” vector
+
+Example: a test on a vector of `int` using  
+`aiv_vector_init()` and `aiv_vector_add()` directly:
+
+```c
+CLOVE_TEST(AddTwoItem) {
+    aiv_vector_t vector;
+    aiv_vector_init(&vector, sizeof(int));
+
+    int i10 = 10;
+    aiv_vector_add(&vector, &i10);
+
+    int i20 = 20;
+    aiv_vector_add(&vector, &i20);
+
+    CLOVE_SIZET_EQ(2, vector.count);
+    CLOVE_INT_EQ(10, ((int*)vector.items)[0]);
+    CLOVE_INT_EQ(20, ((int*)vector.items)[1]);
+
+    aiv_vector_free(&vector);
+}
+```
+Here the values are verified by directly accessing the `items` buffer  
+cast to an `int*`.
+
+---
+
+### Tests with the typed API (`VECTOR_DEFINE`)
+
+The same scenarios can be written in a cleaner way by using the functions  
+generated by the macro:
+
+```c
+CLOVE_TEST(AddTwoItem2) {
+    aiv_vector_t vector;
+    vector_int_init(&vector);
+
+    vector_int_add(&vector, 10);
+    vector_int_add(&vector, 20);
+
+    CLOVE_SIZET_EQ(2, vector.count);
+    CLOVE_INT_EQ(10, vector_int_get(&vector, 0));
+    CLOVE_INT_EQ(20, vector_int_get(&vector, 1));
+
+    aiv_vector_free(&vector);
+}
+
+```
+**Advantages of the typed API:**
+
+- no manual casting from `void*`
+- much more explicit function calls (`vector_int_add`, `vector_int_get`)
+
+---
+
+### Vector of pointers (`int*`)
+
+There is also a test that demonstrates how the vector can store pointers to `int`:
+
+```
+CLOVE_TEST(VectorOfIntPointers_Typed) {
+    aiv_vector_t vector;
+    vector_int_ptr_init(&vector);   // generato da VECTOR_DEFINE(int_ptr)
+
+    int a = 10;
+    int b = 20;
+
+    int* pa = &a;
+    int* pb = &b;
+
+    vector_int_ptr_add(&vector, pa);
+    vector_int_ptr_add(&vector, pb);
+
+    CLOVE_SIZET_EQ(2, vector.count);
+
+    int* v0 = vector_int_ptr_get(&vector, 0);
+    int* v1 = vector_int_ptr_get(&vector, 1);
+
+    CLOVE_INT_EQ(10, *v0);
+    CLOVE_INT_EQ(20, *v1);
+
+    aiv_vector_free(&vector);
+}
+```
+
+This test verifies both:
+
+- the correctness of indexing  
+- the fact that the stored pointers still refer to the original variables (`a` and `b`)
+
+---
+
+### Clove-Unit Runner
+
+The test `main` is minimal and entirely handled by Clove-Unit:
+
+```
+#define CLOVE_IMPLEMENTATION
+#include "clove-unit.h"
+
+CLOVE_RUNNER()
+```
+- `CLOVE_IMPLEMENTATION` enables the internal implementation of the library  
+- `CLOVE_RUNNER()` automatically generates the `main()` function that executes all test suites found in the project
+
+---
+
+## Build and Run the Tests
+
+For convenience, two `.bat` (Windows) scripts have been added with the commands needed to compile the core library and the test suite.
+
+### 1. Compile the core library
+
+```bat
+:: build-core.bat
+clang -o .\bin\core.lib .\core\src\*.c -Icore\include -fuse-ld=llvm-lib
+```
+
+This command:
+
+- compiles all `.c` files inside `core/src`
+- includes the headers from `core/include`
+- produces a static library `core.lib` inside the `bin` folder
+
+---
+
+### 2. Compile and run the tests
+
+```bat
+:: build-test.bat
+clang -o .\bin\test2.exe test\src\*.c -Itest\include -Icore\include -L.\bin -l core
+```
+Here:
+
+- all test files in `test/src` are compiled  
+  (including `aiv_vector_test.c` and `main.c`)
+- both the test headers (`test/include`, which contains `clove-unit.h`)  
+  and the core headers (`core/include`) are included
+- the `core.lib` library is linked from the `bin` folder (`-L.\bin -l core`)
+
+---
+
+### Running the tests
+
+```bat
+build-core.bat
+build-test.bat
+.\bin\test2.exe
+```
+
+Clove-Unit will display a summary report of the executed tests and any failures.
+
+## Conclusions
+
+In contrast to the previous exercise — where the unit testing framework was
+hand-written — this exercise uses an external library (**clove-unit**) that provides:
+
+- more complete and readable macros,
+- an automatic test runner,
+- standardized and professional output.
+
+This allows you to focus on the **quality of the tests** and the  
+**design of the APIs** (`aiv_vector` + `VECTOR_DEFINE`), rather than on maintaining
+the testing infrastructure.
+
+
