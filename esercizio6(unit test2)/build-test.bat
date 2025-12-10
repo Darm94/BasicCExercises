@@ -1,0 +1,1 @@
+ clang -o .\bin\test2.exe test\src\*.c -Itest\include -Icore\include -L.\bin -l core

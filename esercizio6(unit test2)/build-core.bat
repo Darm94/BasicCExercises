@@ -1,0 +1,1 @@
+clang -o .\bin\core.lib  .\core\src\*.c -Icore\include -fuse-ld=llvm-lib
