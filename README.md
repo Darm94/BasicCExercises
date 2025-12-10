@@ -14,11 +14,11 @@ This repository contains this main exercises:
 - (2) Strings Functions
 - (3) Memory Functions & Dynamic Matrices
 - (4) Generic Containers — Vector, List, Dictionary (&Hash Maps)
-
+- (5) Unit Test
+- (6) Unit Test with Clove-Unit (aiv_vector)
 
 ---
 ## (1) Print Command-Line Arguments
-
 
 A simple program that prints all arguments passed to `main()` using `argc` and `argv`.
 This helped to understand how arguments are handled in C programs and the structure of the `argv` array and the role of `argc`.
@@ -34,7 +34,6 @@ Argument 3: 123
 
 ---
 ## (2) Strings Functions
-
 
 This exercise constist to reimplements standard C string functions to try to think about and understand how they work internally.
 
