@@ -864,3 +864,48 @@ Here is a brief summary of the test cases:
 - **`test_list_add_two_items`** — ensures proper head/tail updates and bidirectional links when adding two elements
 - **`test_list_destroy`** — confirms complete list cleanup and reset of internal pointers and counters
 
+## (6) Unit Test con Clove-Unit (`aiv_vector`)
+
+In questo esercizio viene riscritta la suite di test per `aiv_vector` utilizzando  
+la libreria di unit testing **clove-unit** di *Federico De Felici*.
+
+### Obiettivi dell'esercizio
+
+- usare una libreria di test “vera” invece di un framework scritto a mano  
+- mantenere i test semplici, leggibili e facilmente estendibili  
+- mostrare come costruire **wrapper tipizzati** per un vettore generico in C tramite macro  
+
+### Struttura dei file
+
+Per questo esercizio i file principali sono:
+
+- **core/src/aiv_vector.c**  
+  Implementazione del vettore generico.
+
+- **core/include/aiv_vector.h**  
+  Definizione del tipo `aiv_vector_t` e delle macro `VECTOR_DEFINE`.
+
+- **test/src/aiv_vector_test.c**  
+  Suite di test Clove-Unit per `aiv_vector`.
+
+- **test/src/main.c**  
+  Entry point dei test, contiene `CLOVE_RUNNER()`.
+
+- **build-core.bat**  
+  Script per compilare la libreria core.
+
+- **build-test.bat**  
+  Script per compilare ed eseguire i test.
+
+### Implementazione di `aiv_vector`
+
+Il vettore è generico: memorizza elementi di dimensione arbitraria usando  
+`item_size` e `void* items`:
+
+```
+typedef struct aiv_vector {
+    size_t count;
+    void* items;
+    size_t item_size;
+} aiv_vector_t;
+```
