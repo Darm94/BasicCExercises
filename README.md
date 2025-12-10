@@ -881,19 +881,14 @@ Per questo esercizio i file principali sono:
 
 - **core/src/aiv_vector.c**  
   Implementazione del vettore generico.
-
 - **core/include/aiv_vector.h**  
   Definizione del tipo `aiv_vector_t` e delle macro `VECTOR_DEFINE`.
-
 - **test/src/aiv_vector_test.c**  
   Suite di test Clove-Unit per `aiv_vector`.
-
 - **test/src/main.c**  
   Entry point dei test, contiene `CLOVE_RUNNER()`.
-
 - **build-core.bat**  
   Script per compilare la libreria core.
-
 - **build-test.bat**  
   Script per compilare ed eseguire i test.
 
@@ -908,4 +903,89 @@ typedef struct aiv_vector {
     void* items;
     size_t item_size;
 } aiv_vector_t;
+```
+### Funzioni principali
+
+#### `aiv_vector_init(aiv_vector_t* vector, size_t item_size)`
+Inizializza il vettore impostando:
+- `items = NULL`
+- `count = 0`
+- `item_size` uguale alla dimensione del tipo degli elementi
+
+---
+
+#### `aiv_vector_add(aiv_vector_t* vector, void* item)`
+Aggiunge un elemento al vettore:
+
+- rialloca il buffer con `realloc`
+- calcola la posizione corretta in cui copiare l'elemento (in byte)
+- copia i dati usando `memcpy`
+
+Esempio del calcolo della destinazione:
+
+```
+uint8_t* mem_dest = (uint8_t*)vector->items + (vector->item_size * vector->count);
+memcpy(mem_dest, item, vector->item_size);
+```
+#### `aiv_vector_get(aiv_vector_t* vector, size_t index)`
+Restituisce il puntatore all’elemento in posizione `index`:
+
+```
+return (uint8_t*)vector->items + (vector->item_size * index);
+```
+#### `aiv_vector_free(aiv_vector_t* vector)`
+Dealloca il buffer con `free` e resetta tutti i campi:
+
+- `items = NULL`
+- `count = 0`
+- `item_size = 0`
+
+---
+
+### Tipizzazione con `VECTOR_DEFINE`
+
+Per evitare di lavorare sempre con `void*` e cast, in `aiv_vector.h` è stata definita la macro:
+
+```c
+#define VECTOR_DEFINE(TYPE)                                                 \
+    void vector_##TYPE##_init(aiv_vector_t* v) {                            \
+        aiv_vector_init(v, sizeof(TYPE));                                   \
+    }                                                                       \
+                                                                            \
+    void vector_##TYPE##_add(aiv_vector_t* v, TYPE value) {                 \
+        aiv_vector_add(v, &value);                                          \
+    }                                                                       \
+                                                                            \
+    TYPE vector_##TYPE##_get(aiv_vector_t* v, size_t index) {               \
+        return *(TYPE*)aiv_vector_get(v, index);                            \
+    }
+```
+Usando questa macro si possono creare facilmente versioni tipizzate del vettore:
+```
+VECTOR_DEFINE(int)
+VECTOR_DEFINE(float)
+typedef int* int_ptr;
+VECTOR_DEFINE(int_ptr)
+```
+
+Questa macro genera automaticamente funzioni come:
+
+- `vector_int_init`, `vector_int_add`, `vector_int_get`
+- `vector_float_init`, `vector_float_add`, `vector_float_get`
+- `vector_int_ptr_init`, `vector_int_ptr_add`, `vector_int_ptr_get`
+
+In questo modo si ottiene:
+
+- un **tipo generico** sotto al cofano (`aiv_vector_t`)
+- un'**API tipizzata** in superficie, più leggibile e più sicura da usare
+
+### Test con Clove-Unit
+
+La suite di test è definita nel file `test/src/aiv_vector_test.c`.  
+All’inizio del file viene dichiarato il nome della suite:
+
+```
+#define CLOVE_SUITE_NAME VectorSuite
+#include "clove-unit.h"
+#include "aiv_vector.h"
 ```
